@@ -13,11 +13,18 @@ class RandomForest:
     def fit(self, X, y):
         self.trees = []
         for _ in range(self.n_trees):
-            tree = CustomDecisionTree(
-                min_samples_split=self.min_samples_split,
-                max_depth=self.max_depth,
-                n_features=self.n_features,
-            )
+            # Only pass n_features if it is not None
+            if self.n_features is not None:
+                tree = CustomDecisionTree(
+                    min_samples_split=self.min_samples_split,
+                    max_depth=self.max_depth,
+                    n_features=self.n_features,
+                )
+            else:
+                tree = CustomDecisionTree(
+                    min_samples_split=self.min_samples_split,
+                    max_depth=self.max_depth
+                )
             X_sample, y_sample = self._bootstrap_sample(X, y)
             tree.fit(X_sample, y_sample)
             self.trees.append(tree)
@@ -39,3 +46,8 @@ class RandomForest:
         counter = Counter(y)
         most_common = counter.most_common(1)[0][0]
         return most_common
+
+    def score(self, X, y):
+        """Return the accuracy of the model on the given data."""
+        y_pred = self.predict(X)
+        return np.mean(y_pred == y)
